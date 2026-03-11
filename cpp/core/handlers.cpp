@@ -139,6 +139,32 @@ crow::response api(const crow::request&, const std::string& path) {
   return resp;
 }
 
+crow::response left(const crow::request&, const std::string& path) {
+  quitting::keep_alive();
+
+  CROW_LOG_INFO << "left: " << path;
+  crow::response resp;
+  std::filesystem::path p =
+      files::get_web_dir() / (path.empty() ? "index.html" : path);
+  resp.body = path;
+  resp.code = 200;
+  resp.set_header("Content-type", files::path_to_mime_type(p));
+  return resp;
+}
+
+crow::response right(const crow::request&, const std::string& path) {
+  quitting::keep_alive();
+
+  CROW_LOG_INFO << "left: " << path;
+  crow::response resp;
+  std::filesystem::path p =
+      files::get_web_dir() / (path.empty() ? "index.html" : path);
+  resp.body = path;
+  resp.code = 200;
+  resp.set_header("Content-type", files::path_to_mime_type(p));
+  return resp;
+}
+
 crow::response keepalive() {
   quitting::keep_alive();
   crow::response resp;

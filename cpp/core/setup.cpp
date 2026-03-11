@@ -33,6 +33,8 @@ void ConfigureRoutes(crow::SimpleApp& app, const std::string& /*url*/) {
   websocket::configure(app);
   CROW_ROUTE(app, "/www/<path>")(handlers::www_path);
   CROW_ROUTE(app, "/api/<path>")(handlers::api);
+  CROW_ROUTE(app, "/lfile/<path>")(handlers::left);
+  CROW_ROUTE(app, "/rfile/<path>")(handlers::right);
   CROW_ROUTE(app, "/keepalive")
       .methods(crow::HTTPMethod::GET,
                crow::HTTPMethod::POST,
