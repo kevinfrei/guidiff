@@ -1,24 +1,23 @@
 {
   "name": "guidiff",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "scripts": {
-    "prepare": "husky",
-    "cfmt": "passable -i -q \"CMakeLists.txt\" \"cpp/**/CMakeLists.txt\" \"build/*.cmake\"",
+    "cfmt": "passable -i -q \"CMakeLists.txt\" \"src/**/CMakeLists.txt\" \"src/**/*.cmake\" \".cuark/*.cmake\"",
     "format": "tools format bun && bun run cfmt",
     "fmt": "bun run format",
-    "clean": "bun run build/clean.ts",
+    "clean": "bun run .cuark/clean.ts",
     "dcfg": "cmake --preset debug",
     "rcfg": "cmake --preset release",
     "cfg": "bun run dcfg",
     "dcpp": "cmake --build build/Debug",
     "rcpp": "cmake --build build/Release",
     "cpp": "bun run dcpp",
-    "dwww": "bun run build/webbuild.ts Debug",
-    "rwww": "bun run build/webbuild.ts Release",
+    "dwww": "bun run .cuark/webbuild.ts Debug",
+    "rwww": "bun run .cuark/webbuild.ts Release",
     "www": "bun run dwww",
-    "dbld": "bun run build/parbld.ts Debug",
-    "rbld": "bun run build/parbld.ts Release",
+    "dbld": "bun run .cuark/parbld.ts Debug",
+    "rbld": "bun run .cuark/parbld.ts Release",
     "bld": "bun run dbld",
     "dtst": "bun run dcpp && cd build/Debug && ctest --output-on-failure",
     "dtest": "bun run dcpp && cd build/Debug && ctest --output-on-failure",
@@ -28,12 +27,12 @@
     "test": "bun run dtst",
     "drun": "bun run os drun",
     "rrun": "bun run os rrun",
-    "drun:win": "cmd /c build\\\\Debug\\\\cpp\\\\gdiff.exe",
-    "rrun:win": "cmd /c build\\\\Release\\\\cpp\\\\gdiff.exe",
-    "drun:mac": "./build/Debug/cpp/gdiff",
-    "rrun:mac": "./build/Release/cpp/gdiff",
-    "drun:lin": "./build/Debug/cpp/gdiff",
-    "rrun:lin": "./build/Release/cpp/gdiff",
+    "drun:win": "cmd /c build\\\\Debug\\\\src\\\\gdiff.exe",
+    "rrun:win": "cmd /c build\\\\Release\\\\src\\\\gdiff.exe",
+    "drun:mac": "./build/Debug/src/gdiff",
+    "rrun:mac": "./build/Release/src/gdiff",
+    "drun:lin": "./build/Debug/src/gdiff",
+    "rrun:lin": "./build/Release/src/gdiff",
     "run": "bun run drun",
     "dbr": "bun run dbld && bun run drun",
     "rbr": "bun run rbld && bun run rrun",
@@ -41,9 +40,24 @@
     "typecheck": "tsc --noEmit",
     "typechk": "tsc --noEmit",
     "***": "Generate the TypeScript & C++ types from the Crow IDL definitions",
-    "gen": "crow-idl www/Shared/Definitions.ts -c:cpp/ipc/CommonTypes.hpp -t:www/Shared/CommonTypes.ts",
+    "gen": "crow-idl web/Shared/Definitions.ts -c:src/ipc/CommonTypes.hpp -t:web/Shared/CommonTypes.ts",
     "*-*": "Helper to do OS-specific things",
-    "os": "bun run build/os.ts"
+    "os": "bun run .cuark/os.ts"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "bunx lint-staged",
+    "pre-push": "bun run test"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "prettier --write"
+    ],
+    "*.cmake": [
+      "passable -i"
+    ],
+    "CMakeLists.txt": [
+      "passable -i"
+    ]
   },
   "dependencies": {
     "@fluentui/react": "^8.125.5",
@@ -71,9 +85,10 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "clang-format": "^1.8.0",
-    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
+    "simple-git-hooks": "^2.13.1",
     "typescript": "^5.9.3"
   }
 }
