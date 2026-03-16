@@ -1,4 +1,4 @@
-# The core library of the app, implementing the main logic.
+# The core library of guidiff, implementing the main logic.
 # This is basically everything except the main entry point and the tests.
 
 add_library(
@@ -8,19 +8,15 @@ add_library(
     config.cpp
     files.cpp
     from_json.cpp
-    images.cpp
     handlers.cpp
     quitting.cpp
     setup.cpp
     tools.cpp
-    transpile.cpp
-    tunes.cpp
     websocket.cpp
     window.cpp
 )
 target_include_directories(core_lib PUBLIC include)
-# This would be for core-specific header files:
-# target_include_directories(core_lib PRIVATE impl)
+target_include_directories(core_lib PRIVATE impl)
 
 # Link the dependencies with our binary
 target_link_libraries(

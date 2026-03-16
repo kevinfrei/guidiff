@@ -127,10 +127,10 @@ export function GetHelperText(key: Keys) {
   if (key.length === 1) {
     return `${accPrefix}-${key}`;
   }
-  if (key === Keys.Prev) {
+  if (key === Keys.PreviousTrack) {
     return accPrefix + '-←';
   }
-  if (key === Keys.Next) {
+  if (key === Keys.NextTrack) {
     return accPrefix + '-→';
   }
   return `${accPrefix}-${key}`;

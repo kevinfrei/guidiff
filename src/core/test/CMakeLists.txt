@@ -1,14 +1,8 @@
-add_executable(
-  core_testing
-  config_test.cpp
-  files_test.cpp
-  images_test.cpp
-  tools_test.cpp
-)
+add_executable(guidiff_testing config_test.cpp files_test.cpp tools_test.cpp)
 target_link_libraries(
-  core_testing
+  guidiff_testing
   PUBLIC
     ${GTEST_LIB} core_lib ${BOOST_LIB} ${CROW_LIB}
 )
 
-gtest_discover_tests(core_testing)
+gtest_discover_tests(guidiff_testing)

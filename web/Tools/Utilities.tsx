@@ -15,18 +15,36 @@ import {
   ForwardedRef,
   ReactElement,
   SyntheticEvent,
+  useState,
 } from 'react';
 import { IpcCall, OpenDialogOptions } from '../Shared/CommonTypes';
-import { CallMain } from './Ipc';
+import { CallMain, SendMain } from './Ipc';
+import { useMediaEffect } from './MediaEffect';
 
 const { wrn } = MakeLog('EMP:render:Utilities');
+
+// This is a react component to enable the IPC subsystem to talk to the store,
+// keep track of which mode we're in, and generally deal with "global" silliness
+function ResizeListener(): ReactElement {
+  const [, setIsMiniplayer] = useState(false);
+  /* Resizing event handling stuff */
+  const handleWidthChange = (ev: MediaQueryList | MediaQueryListEvent) => {
+    setIsMiniplayer(ev.matches);
+  };
+  useMediaEffect('(max-width: 499px)', handleWidthChange);
+  return <></>;
+}
 
 // This is a react component to enable the IPC subsystem to talk to the store,
 // keep track of which mode we're in, and generally deal with "global" silliness
 export function Utilities(props: {
   audioRef: ForwardedRef<HTMLAudioElement>;
 }): ReactElement {
-  return <></>;
+  return (
+    <>
+      <ResizeListener />
+    </>
+  );
 }
 
 export const mySliderStyles: Partial<ISliderStyles> = {

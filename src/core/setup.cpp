@@ -33,8 +33,8 @@ void ConfigureRoutes(crow::SimpleApp& app, const std::string& /*url*/) {
   websocket::configure(app);
   CROW_ROUTE(app, "/www/<path>")(handlers::www_path);
   CROW_ROUTE(app, "/api/<path>")(handlers::api);
-  CROW_ROUTE(app, "/tune/<path>")(handlers::tune);
-  CROW_ROUTE(app, "/images/<path>")(handlers::images);
+  CROW_ROUTE(app, "/lfile/<path>")(handlers::left);
+  CROW_ROUTE(app, "/rfile/<path>")(handlers::right);
   CROW_ROUTE(app, "/keepalive")
       .methods(crow::HTTPMethod::GET,
                crow::HTTPMethod::POST,
@@ -57,6 +57,7 @@ uint16_t get_random_port() {
   if (port == 0) {
     std::random_device rd;
     std::uniform_int_distribution<int> dist(0, 16383);
+    // TODO: Find an *unused* port
     port = 49152 + static_cast<uint16_t>(dist(rd)); // Use ports in the range
                                                     // 49152-65535
   }
@@ -68,10 +69,9 @@ void init() {
   files::set_program_location();
   std::string url = GetRootUrl();
   CROW_LOG_INFO << "Starting server at " << url;
-
   // Configure the server in a separate thread
   theApp = new crow::SimpleApp();
-  theApp->loglevel(crow::LogLevel::Info);
+  theApp->loglevel(crow::LogLevel::Warning);
   ConfigureRoutes(*theApp, url);
   server_thread = new std::thread(server_thread_func);
   server_thread->detach(); // Allow it to run independently

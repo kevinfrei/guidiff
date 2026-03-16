@@ -28,25 +28,41 @@ import {
 const CurrentView: NEnum = enum_num(num(), {
   disabled: -1,
   none: 0,
-  settings: 1,
-  tools: 2,
-  search: 3,
+  recent: 1,
+  albums: 2,
+  artists: 3,
+  songs: 4,
+  playlists: 5,
+  now_playing: 6,
+  settings: 7,
+  search: 8,
+  tools: 9,
 });
 
 const StrId: SEnum = enum_str({
-  FilePath: 'File Path',
-  FilesSelected: 'Files Selected',
-  ErrNotSingleAndNotMultiple: 'Not Single and not Multiple (This is a bug!)',
-  ErrSingleAndMultiple: 'Both Single and Multiple (This is a bug!)',
-  ViewSettings: 'Settings',
   ViewTools: 'Tools',
+  ChooseFile: 'Choose File...',
+  ViewSettings: 'Settings',
 });
 
 const Keys: SEnum = enum_str({
+  AddFileLocation: 'O',
+  Albums: '2',
+  Artists: '3',
+  Backward10s: '[',
   Find: 'F',
+  Forward10s: ']',
+  NextTrack: 'Right',
+  NowPlaying: '1',
+  Play: 'P',
+  Playlists: '5',
+  PreviousTrack: 'Left',
+  Repeat: 'T',
+  SavePlaylist: 'S',
   Settings: ',',
-  Next: 'Right',
-  Prev: 'Left',
+  Shuffle: 'R',
+  Songs: '4',
+  ToggleMiniPlayer: '9',
   Tools: 'L',
 });
 
@@ -55,13 +71,13 @@ const IpcCall: NEnum = enum_num(u8(), {
   ReadFromStorage: 1,
   WriteToStorage: 2,
   DeleteFromStorage: 3,
-  MinimizeWindow: 4,
-  MaximizeWindow: 5,
-  RestoreWindow: 6,
-  CloseWindow: 7,
-  IsDev: 8,
-  AsyncData: 9,
-  MenuAction: 10,
+  AsyncData: 4,
+  IsDev: 5,
+  MenuAction: 6,
+  MinimizeWindow: 7,
+  MaximizeWindow: 8,
+  RestoreWindow: 9,
+  CloseWindow: 10,
   ShowOpenDialog: 11,
 });
 
@@ -72,8 +88,8 @@ const SocketMsg: Enum = enum_lst(u8(), [
 ]);
 
 const StorageId: SEnum = enum_str({
-  CurrentView: 'currentView',
   SettingValue: 'someSetting',
+  CurrentView: 'currentView',
 });
 
 const MimeData = obj({

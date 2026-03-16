@@ -15,7 +15,6 @@
 
 #include "config.hpp"
 
-// Cuz I'm lazy:
 namespace fs = std::filesystem;
 
 namespace config {

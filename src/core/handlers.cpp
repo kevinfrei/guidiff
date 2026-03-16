@@ -6,18 +6,15 @@
 #include <string>
 
 #include <crow.h>
-#include <crow/logging.h>
 
 #include "CommonTypes.hpp"
 #include "api.hpp"
 #include "config.hpp"
 #include "files.hpp"
-#include "images.hpp"
 #include "quitting.hpp"
 #include "setup.hpp"
 #include "text_tools.hpp"
 #include "tools.hpp"
-#include "tunes.hpp"
 
 #include "handlers.hpp"
 
@@ -55,127 +52,17 @@ crow::response www_path(const crow::request&, const std::string& path) {
       resp.body = content;
       resp.code = 200;
       resp.set_header("Content-Type", "text/html");
-      CROW_LOG_INFO << "Sending transformed index.html";
     } else {
-      CROW_LOG_INFO << "Placeholder not found in index.html file: "
-                    << p.generic_string();
+      CROW_LOG_ERROR << "Placeholder not found in index.html file: "
+                     << p.generic_string();
       resp.code = 500;
       resp.body = "Internal Server Error";
       resp.set_header("Content-Type", "text/plain");
     }
   } else {
-    CROW_LOG_INFO << "Sending raw file " << p.generic_string();
     resp.set_static_file_info_unsafe(p.generic_string());
     resp.set_header("Content-type", files::path_to_mime_type(p));
   }
-  return resp;
-}
-
-crow::response images(const crow::request&, const std::string& query) {
-  quitting::keep_alive();
-  crow::response resp;
-  std::filesystem::path p = image::get_image_path(query);
-  CROW_LOG_INFO << "Images " << p.generic_string();
-  resp.set_static_file_info_unsafe(p.generic_string());
-  resp.set_header("Content-type", files::path_to_mime_type(p));
-  return resp;
-}
-
-// TODO: Make this actually validate the Range header
-struct range_header {
-  std::uint64_t start;
-  std::uint64_t end;
-  bool start_present;
-  bool end_present;
-};
-
-std::optional<range_header> validate_range_header(const std::string& range) {
-  std::optional<range_header> res;
-  if (range.substr(0, 6) != "bytes=") {
-    return res;
-  }
-  size_t dashPos = range.find('-');
-  if (dashPos == std::string::npos) {
-    return res;
-  }
-  range_header rh;
-  rh.start_present = false;
-  rh.end_present = false;
-  if (dashPos > 6) {
-    rh.start = std::stoull(range.substr(6, dashPos - 6));
-    rh.start_present = true;
-  }
-  if (dashPos + 1 < range.size()) {
-    rh.end = std::stoull(range.substr(dashPos + 1));
-    rh.end_present = true;
-  }
-  if (rh.start_present || rh.end_present) {
-    res = rh;
-  }
-  return res;
-}
-
-crow::response tune(const crow::request& req, const std::string& path) {
-  quitting::keep_alive();
-  crow::response resp;
-  auto maybe_song = tunes::get_tune(path);
-  if (!maybe_song) {
-    tools::e404(resp, "Tune not found");
-    return resp;
-  }
-  /*
-  A minimal implementation needs to:
-  Parse the Range header
-  Compute the correct byte offsets
-  Return 206 Partial Content
-  Include Content-Range and Accept-Ranges: bytes
-  Send only the requested slice of the file
-  */
-  const auto& range = req.headers.find("Range");
-  range_header rh;
-  if (range == req.headers.end()) {
-    resp.code = 416;
-    return resp;
-  }
-  CROW_LOG_INFO << "Range header: " << range->second;
-  auto maybe_range = validate_range_header(range->second);
-  if (!maybe_range.has_value()) {
-    // TODO: Handle weirder ranges?
-    resp.code = 416;
-    return resp;
-  } else {
-    rh = maybe_range.value();
-  }
-  const auto& song = maybe_song.value();
-  // TODO: Get the file size, check to see we can send the amount requested.
-  // If we can, go ahead & send it.
-  // Common case: Safari asks for 0-1 for audio files, presumably to detect
-  // the total file size?
-  if (rh.start_present && rh.end_present && rh.start == 0 && rh.end == 1) {
-    // Send the two starting bytes for 'song':
-    std::ifstream file(song, std::ios::binary);
-    if (file.is_open()) {
-      char buffer[2];
-      file.read(buffer, 2);
-      resp.body = std::string(buffer, 2);
-      resp.code = 206;
-      resp.set_header("Content-Type", files::path_to_mime_type(song));
-      resp.set_header("Accept-Ranges", "bytes");
-      resp.set_header(
-          "Content-Range",
-          "bytes 0-1/" + std::to_string(std::filesystem::file_size(song)));
-      return resp;
-    }
-  }
-  resp.set_static_file_info_unsafe(song.generic_string());
-  resp.set_header("Content-type", files::path_to_mime_type(song));
-  resp.set_header("Accept-Ranges", "bytes");
-  std::size_t fileSize = std::filesystem::file_size(song);
-  std::ostringstream o;
-  o << "bytes 0-" << fileSize - 1 << "/" << fileSize;
-  CROW_LOG_DEBUG << o.str();
-  resp.set_header("Content-Range", o.str());
-  resp.code = 206; // Partial Content
   return resp;
 }
 
@@ -252,6 +139,32 @@ crow::response api(const crow::request&, const std::string& path) {
   return resp;
 }
 
+crow::response left(const crow::request&, const std::string& path) {
+  quitting::keep_alive();
+
+  CROW_LOG_INFO << "left: " << path;
+  crow::response resp;
+  std::filesystem::path p =
+      files::get_web_dir() / (path.empty() ? "index.html" : path);
+  resp.body = path;
+  resp.code = 200;
+  resp.set_header("Content-type", files::path_to_mime_type(p));
+  return resp;
+}
+
+crow::response right(const crow::request&, const std::string& path) {
+  quitting::keep_alive();
+
+  CROW_LOG_INFO << "left: " << path;
+  crow::response resp;
+  std::filesystem::path p =
+      files::get_web_dir() / (path.empty() ? "index.html" : path);
+  resp.body = path;
+  resp.code = 200;
+  resp.set_header("Content-type", files::path_to_mime_type(p));
+  return resp;
+}
+
 crow::response keepalive() {
   quitting::keep_alive();
   crow::response resp;
@@ -266,7 +179,7 @@ crow::response quit() {
   return crow::response(200);
 }
 
-void socket_message(crow::websocket::connection& /*conn*/,
+void socket_message(crow::websocket::connection& conn,
                     const std::string& data,
                     bool /* is_binary */) {
   CROW_LOG_INFO << "Got a message from the client:" << data;
